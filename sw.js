@@ -1,5 +1,5 @@
-// Service worker — แคชไฟล์แอปไว้ใช้ออฟไลน์
-const CACHE = "expense-app-v10";
+// Service worker — network-first สำหรับหน้าเว็บ (ออนไลน์ได้ของใหม่เสมอ), cache-first สำหรับไอคอน
+const CACHE = "expense-app-v11";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,20 +14,37 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
+self.addEventListener("message", (e) => { if (e.data === "skipWaiting") self.skipWaiting(); });
+
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then((hit) => {
-      if (hit) return hit;
-      return fetch(e.request).then((res) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
+
+  if (isHTML) {
+    // network-first: ลองโหลดของใหม่ก่อน ถ้าออฟไลน์ค่อยใช้ cache
+    e.respondWith(
+      fetch(req).then((res) => {
         const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
         return res;
-      }).catch(() => caches.match("./index.html"));
-    })
+      }).catch(() => caches.match(req).then((h) => h || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // อื่นๆ (ไอคอน/manifest): cache-first แล้วอัปเดตเบื้องหลัง
+  e.respondWith(
+    caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+      return res;
+    }))
   );
 });

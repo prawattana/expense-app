@@ -651,9 +651,24 @@ window.addEventListener("touchend",()=>{
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;view.style.transform="";view.style.opacity="";window.scrollTo(0,0);render();});
 render();
 
-/* ---------- PWA ---------- */
+/* ---------- PWA + auto-update ---------- */
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(refreshing)return;refreshing=true;location.reload();   // มีเวอร์ชันใหม่เข้าควบคุม → รีโหลดทันที
+  });
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").then(reg=>{
+      reg.update();                                            // เช็กอัปเดตทุกครั้งที่เปิดแอป
+      setInterval(()=>reg.update(),30*60*1000);
+      reg.addEventListener("updatefound",()=>{
+        const nw=reg.installing;
+        nw&&nw.addEventListener("statechange",()=>{
+          if(nw.state==="installed"&&navigator.serviceWorker.controller)nw.postMessage("skipWaiting");
+        });
+      });
+    }).catch(()=>{});
+  });
 }
 </script>
 </body>

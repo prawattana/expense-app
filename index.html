@@ -23,11 +23,12 @@
   --radius:20px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;height:100%;}
+html,body{margin:0;padding:0;}
 body{
   background:var(--bg);color:var(--white);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Sarabun","Noto Sans Thai",sans-serif;
-  font-size:15px;height:100dvh;overflow:hidden;overscroll-behavior:none;
+  font-size:15px;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:none;
+  padding-bottom:calc(70px + env(safe-area-inset-bottom));
 }
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
@@ -40,9 +41,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .ambient i:nth-child(2){width:220px;height:220px;background:#e2231a;bottom:140px;right:-80px;opacity:.07;}
 .ambient i:nth-child(3){width:280px;height:280px;background:#1a0202;bottom:-90px;left:30%;opacity:.25;}
 
-#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:480px;margin:0 auto;position:relative;}
+#app{max-width:480px;margin:0 auto;position:relative;}
 
-main{flex:1;min-height:0;overflow-y:auto;padding:max(18px,calc(14px + env(safe-area-inset-top))) 16px calc(96px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;will-change:transform;}
+main{padding:max(18px,calc(14px + env(safe-area-inset-top))) 16px 24px;will-change:transform;}
 .fade{animation:fade .22s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
 
@@ -589,13 +590,13 @@ function setPull(d){
   pullText.textContent=ready?"ปล่อยเพื่อเพิ่มรายการ ✓":"↓ ดึงลงเพื่อเพิ่มรายการ";
 }
 
-view.addEventListener("touchstart",ev=>{
+window.addEventListener("touchstart",ev=>{
   if(modalOpen()||ev.touches.length!==1){active=false;return;}
   sx=ev.touches[0].clientX;sy=ev.touches[0].clientY;
   axis=null;active=true;pDist=0;dxNow=0;
 },{passive:true});
 
-view.addEventListener("touchmove",ev=>{
+window.addEventListener("touchmove",ev=>{
   if(!active)return;
   const dx=ev.touches[0].clientX-sx, dy=ev.touches[0].clientY-sy;
   if(!axis){
@@ -612,12 +613,12 @@ view.addEventListener("touchmove",ev=>{
     view.style.transform="translateX("+t+"px)";
     view.style.opacity=(1-Math.min(0.4,Math.abs(dx)/600)).toFixed(2);
   } else {
-    if(tab==="settings"||tab==="wallet"||view.scrollTop>2||dy<=0){pDist=0;setPull(0);return;}
+    if(tab==="settings"||tab==="wallet"||window.scrollY>2||dy<=0){pDist=0;setPull(0);return;}
     pDist=dy;setPull(dy);
   }
 },{passive:false});
 
-view.addEventListener("touchend",()=>{
+window.addEventListener("touchend",()=>{
   if(!active){setPull(0);return;}
   active=false;
   if(axis==="h"&&tab==="month"){
@@ -641,7 +642,7 @@ view.addEventListener("touchend",()=>{
 });
 
 /* ---------- wire ---------- */
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;view.style.transform="";view.style.opacity="";view.scrollTop=0;render();});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;view.style.transform="";view.style.opacity="";window.scrollTo(0,0);render();});
 render();
 
 /* ---------- PWA ---------- */

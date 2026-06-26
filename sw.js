@@ -1,5 +1,5 @@
 // Service worker — แคชไฟล์แอปไว้ใช้ออฟไลน์
-const CACHE = "expense-app-v7";
+const CACHE = "expense-app-v8";
 const ASSETS = [
   "./",
   "./index.html",

@@ -285,8 +285,10 @@ function budgetCardHTML(exp){
   </div>`;
 }
 
-function pendingCardHTML(){
-  const pend=exps.filter(isPending).sort((a,b)=>a.date.localeCompare(b.date));
+function pendingCardHTML(ym){
+  let pend=exps.filter(isPending);
+  if(ym)pend=pend.filter(e=>e.date.startsWith(ym));
+  pend=pend.sort((a,b)=>a.date.localeCompare(b.date));
   if(!pend.length)return"";
   const total=pend.reduce((s,e)=>s+e.amount,0);
   return `<div class="block-head">ค้างจ่าย / ล่วงหน้า</div>
@@ -357,7 +359,7 @@ function renderMonth(){
           <span class="amt mono${inq?" in":""}">${inq?"+":""}${fmt(e.amount)}</span></button>`;}).join("")}</div>
     </div>`;
   }).join("");
-  body+=pendingCardHTML();
+  body+=pendingCardHTML(viewYm);
   view.innerHTML=body;
   wireRows();
 }

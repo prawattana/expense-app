@@ -464,8 +464,12 @@ function renderWallet(){
   view.querySelectorAll("[data-wren]").forEach(b=>b.onclick=()=>{
     const w=wallets.find(x=>x.id===b.dataset.wren);
     const nm=prompt("ชื่อกระเป๋า",w.name);if(nm===null)return;
-    const st=prompt("เงินตั้งต้น (฿)",w.start||0);if(st===null)return;
-    w.name=nm.trim()||w.name;w.start=Number(st)||0;saveWallets();renderWallet();
+    const bal=walletBalance(w.id);
+    const txn=bal-(w.start||0);                 // ยอดจากรายรับ-รายจ่ายในกระเป๋านี้
+    const v=prompt("จำนวนเงินในกระเป๋าตอนนี้ (฿)",bal);if(v===null)return;
+    w.name=nm.trim()||w.name;
+    w.start=(Number(v)||0)-txn;                 // คำนวณย้อนให้ยอดคงเหลือ = ที่กรอก
+    saveWallets();renderWallet();
   });
   view.querySelectorAll("[data-wdel]").forEach(b=>b.onclick=()=>{
     if(wallets.length<=1){alert("ต้องมีอย่างน้อย 1 กระเป๋า");return;}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0d0d0d"/>
+  <rect x="96" y="150" width="320" height="232" rx="34" fill="#1c1c1e" stroke="#e2231a" stroke-width="10"/>
+  <rect x="96" y="150" width="320" height="70" rx="34" fill="#e2231a"/>
+  <circle cx="350" cy="288" r="30" fill="#0d0d0d" stroke="#e2231a" stroke-width="9"/>
+  <text x="256" y="345" font-family="Arial, sans-serif" font-size="150" font-weight="800" fill="#f4f4f4" text-anchor="middle">฿</text>
+</svg>
